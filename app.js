@@ -51,6 +51,19 @@ app.post('/new-movie', (req, res)=>{
     }
 
 })
+
+app.put("/update-movie/:titleToUpdate", (req, res)=>{
+    const titleToUpdate = req.params.titleToUpdate;
+    const found = favoriteMovies.find(movie=>movie.title ===  titleToUpdate);
+    console.log(found);
+    Object.keys(found).forEach(key=>{
+        if(Object.keys(req.body).includes(key) && found[key] !== req.body[key]){
+            found[key] = req.body[key];
+        }
+    })
+    res.send(favoriteMovies);
+})
+
 app.get("/all-movies", (req, res)=>{
     let movieList = favoriteMovieList.join(" ");
     res.status(200).send(movieList);
@@ -63,12 +76,10 @@ app.get('/add-movie', (req, res)=>{
     favoriteMovieList.push(req.query);
     res.redirect('/list-movies');
 })
-app.put("/update-movie/:titleToUpdate", (req, res)=>{
-    const titleToUpdate = req.params.titleToUpdate;
-    // update movie by title
-})
+
 app.delete("/delete-movie/:titleToDelete", (req, res)=>{
     const titleToDelete = req.params.titleToDelete;
+
     // delete movie by title
 })
 app.listen(port, ()=>{
