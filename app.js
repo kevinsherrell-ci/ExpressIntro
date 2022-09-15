@@ -53,17 +53,47 @@ app.post('/new-movie', (req, res)=>{
 })
 
 app.put("/update-movie/:titleToUpdate", (req, res)=>{
-    const titleToUpdate = req.params.titleToUpdate;
-    const found = favoriteMovies.find(movie=>movie.title ===  titleToUpdate);
-    console.log(found);
-    Object.keys(found).forEach(key=>{
-        if(Object.keys(req.body).includes(key) && found[key] !== req.body[key]){
-            found[key] = req.body[key];
-        }
-    })
-    res.send(favoriteMovies);
-})
+    let titleToUpdate;
+    if(req.params.titleToUpdate){
+        titleToUpdate = req.params.titleToUpdate;
+    }else{
+        throw "Must provide a title to update";
+    }
+    try{
+        const found = favoriteMovies.find(movie=>movie.title ===  titleToUpdate);
+        // iterate through each field of the object and replace the value if there is a new value
+        Object.keys(found).forEach(key=>{
+            if(Object.keys(req.body).includes(key) && found[key] !== req.body[key]){
+                found[key] = req.body[key];
+                found.lastModified = Date.now();
+            }
+        })
+        res.send(favoriteMovies);
+    }catch(err){
+        res.status(500).send(err.message);
+    }
 
+})
+app.get("/single-movie/:titleToFind", (req, res)=>{
+    let titleToFind;
+    if(req.params.titleToFind){
+        titleToFind = req.params.titleToFind;
+    }else{
+        throw "must provide a title";
+    }
+    try{
+        const found = favoriteMovies.find(movie=>movie.title === titleToFind);
+        console.log(found);
+        if(found === null || found === undefined){
+            res.status(400).send("Movie not found");
+        }else{
+            res.status(200).send(found);
+        }
+    }catch(err){
+        res.status(50).send(err.message);
+    }
+
+})
 app.get("/all-movies", (req, res)=>{
     let movieList = favoriteMovieList.join(" ");
     res.status(200).send(movieList);
@@ -78,7 +108,19 @@ app.get('/add-movie', (req, res)=>{
 })
 
 app.delete("/delete-movie/:titleToDelete", (req, res)=>{
-    const titleToDelete = req.params.titleToDelete;
+    let titleToDelete;
+    if(req.params.titleToDelete){
+        titleToDelete = req.params.titleToDelete;
+    }else{
+        throw "Must provide a title to delete";
+    }
+    try{
+        const found = favoriteMovies.findIndex(movie=>movie.title === titleToDelete);
+        res.status(200).send(favoriteMovies.splice(found, 1));
+        console.log(favoriteMovies);
+    }catch(err){
+        res.status(500).send(err.message);
+    }
 
     // delete movie by title
 })
